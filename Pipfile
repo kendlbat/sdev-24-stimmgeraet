@@ -8,6 +8,7 @@ numpy = "*"
 scipy = "*"
 matplotlib = "*"
 pyaudio = "*"
+sense-hat = "*"
 
 [dev-packages]
 

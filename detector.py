@@ -3,7 +3,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.fftpack import fft
 import datetime as dt
-from util import NoteFreq
+from util import NoteFreq, hertz_to_note
+from sense_hat import SenseHat
+sense = SenseHat()
 
 # Audio stream parameters
 CHUNK = 16384  # Higher chunk size for better frequency resolution
@@ -94,14 +96,13 @@ def plot_audio_stream():
             ):
                 persistant_tone = prev
                 # print(f"Persistent tone detected: {prev:.2f} Hz")
+                note, offset = hertz_to_note(persistant_tone)
 
-                diff = get_difference_to_detected(selected.value)
-
-                if diff is None:
+                if note is None:
                     print("No tone detected")
                 else:
                     print(
-                        f"Detected {selected.name} with a difference of {diff:.2f} Hz"
+                        f"Detected {note.name} with a difference of {offset:.2f} Hz"
                     )
                     if selected.value * 0.95 < persistant_tone < selected.value * 1.05:
                         print("Tune is correct")
