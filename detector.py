@@ -4,8 +4,6 @@ import matplotlib.pyplot as plt
 from scipy.fftpack import fft
 import datetime as dt
 from util import NoteFreq, hertz_to_note
-from sense_hat import SenseHat
-sense = SenseHat()
 
 # Audio stream parameters
 CHUNK = 16384  # Higher chunk size for better frequency resolution
@@ -16,6 +14,16 @@ OVERLAP = 0.5  # Overlap factor
 
 MINIMUM_DETECTION_DURATION = 0.15
 
+RPI_ENABLE = False
+
+if RPI_ENABLE:
+    import sense_hat as SenseHat
+
+    sense = SenseHat()
+
+BLUE = (0, 0, 255)
+RED = (255, 0, 0)
+GREEN = (0, 255, 0)
 # Boolean to enable or disable plotting
 ENABLE_PLOT = False
 
@@ -89,7 +97,7 @@ def plot_audio_stream():
         # Find the frequency with the maximum amplitude
 
         loudest_freq = xf[np.argmax(yf)]
-        if (loudest_freq > prev * 0.95) and (loudest_freq < prev * 1.05):
+        if (loudest_freq > prev - 0.1) and (loudest_freq < prev + 0.1):
             # print(f"Prev detection duration: {dt.datetime.now() - prev_start}")
             if dt.datetime.now() - prev_start > dt.timedelta(
                 seconds=MINIMUM_DETECTION_DURATION
@@ -101,11 +109,17 @@ def plot_audio_stream():
                 if note is None:
                     print("No tone detected")
                 else:
-                    print(
-                        f"Detected {note.name} with a difference of {offset:.2f} Hz"
-                    )
-                    if selected.value * 0.95 < persistant_tone < selected.value * 1.05:
-                        print("Tune is correct")
+                    print(f"Detected {note.name} with a difference of {offset:.2f} Hz")
+                    if RPI_ENABLE:
+                        if note.value < 0:
+                            sense.show_message(note.name, text_colour=BLUE)
+                        elif note.value > 0:
+                            sense.show_message(note.name, text_colour=RED)
+
+                    if note.value - 1 < persistant_tone < note.value + 1:
+                        print(f"Tune is correct {note.name}")
+                        if RPI_ENABLE:
+                            sense.show_message(note.name, text_colour=GREEN)
         else:
             persistant_tone = None
             prev_start = dt.datetime.now()
