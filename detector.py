@@ -109,17 +109,21 @@ def plot_audio_stream():
                 if note is None:
                     print("No tone detected")
                 else:
-                    print(f"Detected {note.name} with a difference of {offset:.2f} Hz")
+                    name: str = note.name
+                    if name[-1] == "S":
+                        name = name[:-1] + "#"
+
+                    print(f"Detected {name} with a difference of {offset:.2f} Hz")
                     if RPI_ENABLE:
                         if note.value < 0:
-                            sense.show_message(note.name, text_colour=BLUE)
+                            sense.show_message(name, text_colour=BLUE)
                         elif note.value > 0:
-                            sense.show_message(note.name, text_colour=RED)
+                            sense.show_message(name, text_colour=RED)
 
                     if note.value - 1 < persistant_tone < note.value + 1:
-                        print(f"Tune is correct {note.name}")
+                        print(f"Tune is correct {name}")
                         if RPI_ENABLE:
-                            sense.show_message(note.name, text_colour=GREEN)
+                            sense.show_message(name, text_colour=GREEN)
         else:
             persistant_tone = None
             prev_start = dt.datetime.now()
